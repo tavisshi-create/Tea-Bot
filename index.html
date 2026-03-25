@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeaBot - Your Cozy Companion</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Aesthetic Tea-Themed Styling */
+        :root {
+            --bg-color: #f8f5f2; /* Creamy off-white */
+            --container-bg: #ffffff;
+            --accent-green: #9fb8ad; /* Sage green */
+            --accent-brown: #7c6a58; /* Warm tea brown */
+            --text-main: #4a4a4a;
+            --user-bubble: #e8eceb;
+            --bot-bubble: #9fb8ad;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Georgia', serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#d1d9d5 0.5px, transparent 0.5px);
+            background-size: 20px 20px; /* Subtle polka dot pattern */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        #chat-container {
+            width: 400px;
+            height: 600px;
+            background: var(--container-bg);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(124, 106, 88, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(159, 184, 173, 0.3);
+        }
+
+        #chat-header {
+            background: var(--accent-green);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            font-style: italic;
+        }
+
+        #chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-green) transparent;
+        }
+
+        /* Message Bubbles */
+        .message {
+            max-width: 75%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--user-bubble);
+            color: var(--text-main);
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--bot-bubble);
+            color: white;
+            border-bottom-left-radius: 5px;
+        }
+
+        /* Input Area */
+        #input-area {
+            display: flex;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #f0f0f0;
+            gap: 12px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 25px;
+            border: 1px solid #eee;
+            outline: none;
+            background: #fafafa;
+            color: var(--text-main);
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border: 1px solid var(--accent-green);
+        }
+
+        button {
+            background: var(--accent-brown);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        button:hover {
+            background: #5d4f42;
+            transform: scale(1.05);
+        }
+
+        /* Fun detail: a little steam emoji decoration */
+        .header-icon {
+            font-size: 1.2rem;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container">
+        <div id="chat-header">
+            <span class="header-icon">☕</span> TeaBot <span class="header-icon">🌿</span>
+        </div>
+        <div id="chat-box">
+            <div class="message bot-message">Steeping some fresh thoughts... Welcome to the tea room! I'm TeaBot. How are you feeling today?</div>
+        </div>
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="Spill the tea..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const inputField = document.getElementById("user-input");
+            const message = inputField.value.trim();
+            
+            if (message === "") return;
+
+            appendMessage(message, "user-message");
+            inputField.value = "";
+
+            // Call the Python backend
+            $.get("/get", { msg: message }).done(function(data) {
+                // You can add a small delay here to simulate "steeping" a response
+                setTimeout(() => {
+                    appendMessage(data, "bot-message");
+                }, 400);
+            });
+        }
+
+        function appendMessage(text, className) {
+            const chatBox = document.getElementById("chat-box");
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "message " + className;
+            msgDiv.innerText = text;
+            chatBox.appendChild(msgDiv);
+            
+            chatBox.scrollTo({
+                top: chatBox.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
